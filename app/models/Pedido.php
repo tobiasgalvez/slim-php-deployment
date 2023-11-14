@@ -19,19 +19,19 @@ class Pedido
         try {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta
-            ("INSERT INTO pedidos (precio_total, id_producto, id_usuario, id_mesa, codigo, estado, horario_llegada, 
-            horario_salida, nombre_cliente, tiempo_demora) 
-            VALUES (:precio_total, :id_producto, :id_usuario, :id_mesa, :codigo, :estado, :horario_llegada, 
-            :horario_salida, :nombre_cliente, :tiempo_demora)");
+            ("INSERT INTO pedidos (precio_total, id_producto, id_usuario, id_mesa, codigo, 
+            nombre_cliente, tiempo_demora) 
+            VALUES (:precio_total, :id_producto, :id_usuario, :id_mesa, :codigo, 
+            :nombre_cliente, :tiempo_demora)");
     
             $consulta->bindValue(':precio_total', $this->precio_total, PDO::PARAM_STR);
             $consulta->bindValue(':id_producto', $this->id_producto, PDO::PARAM_STR);
             $consulta->bindValue(':id_usuario', $this->id_usuario, PDO::PARAM_STR);
             $consulta->bindValue(':id_mesa', $this->id_mesa, PDO::PARAM_STR);
             $consulta->bindValue(':codigo', $this->codigo, PDO::PARAM_STR);
-            $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
-            $consulta->bindValue(':horario_llegada', $this->horario_llegada, PDO::PARAM_STR);
-            $consulta->bindValue(':horario_salida', $this->horario_salida, PDO::PARAM_STR);
+            //$consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
+            // $consulta->bindValue(':horario_llegada', $this->horario_llegada, PDO::PARAM_STR);
+            // $consulta->bindValue(':horario_salida', $this->horario_salida, PDO::PARAM_STR);
             $consulta->bindValue('nombre_cliente', $this->nombre_cliente, PDO::PARAM_STR);
             $consulta->bindValue(':tiempo_demora', $this->tiempo_demora, PDO::PARAM_STR);
 
@@ -49,7 +49,7 @@ class Pedido
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT id, precio_total, id_producto, id_usuario, id_mesa, 
-        codigo, estado, horario_llegada, horario_salida, nombre_cliente, tiempo_demora 
+        codigo, estado, horario_llegada, horario_salida, nombre_cliente, tiempo_demora, activo 
         FROM pedidos WHERE activo != 0");
         $consulta->execute();
 
@@ -60,7 +60,7 @@ class Pedido
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT id, precio_total, id_producto, id_usuario, id_mesa, 
-        codigo, estado, horario_llegada, horario_salida, nombre_cliente, tiempo_demora
+        codigo, estado, horario_llegada, horario_salida, nombre_cliente, tiempo_demora, activo
         FROM pedidos WHERE id = :id AND activo != 0");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
