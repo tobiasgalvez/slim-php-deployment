@@ -7,7 +7,7 @@ class Usuario
     public $apellido;
     public $tipo;
     public $usuario;
-    public $contraseña;
+    public $clave;
     public $email;
     public $fechaBaja;
     public $activo;
@@ -18,14 +18,14 @@ class Usuario
         try {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta
-            ("INSERT INTO usuarios (nombre, apellido, tipo, usuario, contraseña, email) 
-            VALUES (:nombre, :apellido, :tipo, :usuario, :contraseña, :email)");
+            ("INSERT INTO usuarios (nombre, apellido, tipo, usuario, clave, email) 
+            VALUES (:nombre, :apellido, :tipo, :usuario, :clave, :email)");
     
             $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
             $consulta->bindValue(':apellido', $this->apellido, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':usuario', $this->usuario, PDO::PARAM_STR);
-            $consulta->bindValue(':contraseña', $this->contraseña, PDO::PARAM_STR);
+            $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
     
             $consulta->execute();
@@ -41,7 +41,7 @@ class Usuario
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, contraseña, email 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo 
         FROM usuarios WHERE activo != 0");
         $consulta->execute();
 
@@ -51,7 +51,7 @@ class Usuario
     public static function obtenerUsuario($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, contraseña, email 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo
         FROM usuarios WHERE id = :id AND activo != 0");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
@@ -70,13 +70,13 @@ class Usuario
         {
             $objAccesoDato = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios 
-                SET nombre = :nombre, apellido = :apellido, tipo = :tipo, usuario = :usuario, contraseña = :contraseña, email = :email
+                SET nombre = :nombre, apellido = :apellido, tipo = :tipo, usuario = :usuario, clave = :clave, email = :email
                 WHERE id = :id");
             $consulta->bindValue(':nombre', $usuarioIngresado->nombre, PDO::PARAM_STR);
             $consulta->bindValue(':apellido', $usuarioIngresado->apellido, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $usuarioIngresado->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':usuario', $usuarioIngresado->usuario, PDO::PARAM_STR);
-            $consulta->bindValue(':contraseña', $usuarioIngresado->contraseña, PDO::PARAM_STR);
+            $consulta->bindValue(':clave', $usuarioIngresado->clave, PDO::PARAM_STR);
             $consulta->bindValue(':email', $usuarioIngresado->email, PDO::PARAM_STR);
             $consulta->bindValue(':id', $usuarioIngresado->id, PDO::PARAM_INT);
             

@@ -33,7 +33,7 @@ class Producto
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion, activo 
         FROM productos WHERE activo != 0");
         $consulta->execute();
 
@@ -43,7 +43,7 @@ class Producto
     public static function obtenerProducto($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion,activo 
         FROM productos WHERE id = :id AND activo != 0");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();

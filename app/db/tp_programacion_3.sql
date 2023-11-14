@@ -79,7 +79,7 @@ CREATE TABLE `usuarios` (
   `apellido` varchar(50) NOT NULL,
   `tipo` varchar(50) NOT NULL,
   `usuario` varchar(50) NOT NULL,
-  `contraseña` varchar(50) NOT NULL,
+  `clave` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `activo` tinyint(1) NOT NULL DEFAULT 1,
   `fechaBaja` timestamp NULL DEFAULT NULL

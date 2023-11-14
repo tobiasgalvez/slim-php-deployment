@@ -13,7 +13,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $apellido = $parametros['apellido'];
         $tipo = $parametros['tipo'];
         $usuario = $parametros['usuario'];
-        $contraseña = $parametros['contraseña'];
+        $clave = $parametros['clave'];
         $email = $parametros['email'];
 
         // Creamos el usuario
@@ -22,7 +22,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $usr->apellido = $apellido;
         $usr->tipo = $tipo;
         $usr->usuario = $usuario;
-        $usr->contraseña = $contraseña;
+        $usr->clave = $clave;
         $usr->email = $email;
 
 
@@ -78,7 +78,7 @@ class UsuarioController extends Usuario implements IApiUsable
         $usuarioAModificar->apellido = $parametros['apellido'];
         $usuarioAModificar->tipo = $parametros['tipo'];
         $usuarioAModificar->usuario = $parametros['usuario'];
-        $usuarioAModificar->contraseña = $parametros['contraseña'];
+        $usuarioAModificar->clave = $parametros['clave'];
         $usuarioAModificar->email = $parametros['email'];
 
 

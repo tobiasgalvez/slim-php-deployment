@@ -18,10 +18,11 @@ require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/PedidoController.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->safeLoad();
+// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// $dotenv->safeLoad();
 
-print_r($_ENV);
+// print_r($_ENV);
+//php -S localhost:666 -t app
 // Instantiate App
 $app = AppFactory::create();
 
@@ -41,8 +42,16 @@ $app->get('[/]', function (Request $request, Response $response) {
     return $response->withHeader('Content-Type', 'application/json');
 });
 
-$app->post('/usuarios', 'UsuarioController:CargarUno');
-$app->get('/usuarios/{id}', \UsuarioController::class . ':TraerUno');
+$app->post('/usuarios',      'UsuarioController:CargarUno');
+$app->get('/usuarios/{id}',  'UsuarioController:TraerUno');
+$app->get('/usuarios',           'UsuarioController:TraerTodos');
+$app->put('/usuarios/{id}',  'UsuarioController:ModificarUno');
+$app->delete('/usuarios/{id}',  'UsuarioController:BorrarUno');
+
+$app->post('/productos',      'ProductoController:CargarUno');
+$app->get('/productos/{id}',      'ProductoController:TraerUno');
+$app->get('/productos',      'ProductoController:TraerTodos');
+
 
 $app->get('/test', function (Request $request, Response $response) {
     $payload = json_encode(array('method' => 'GET', 'msg' => "Bienvenido a SlimFramework 2023"));
