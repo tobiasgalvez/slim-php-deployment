@@ -2,7 +2,7 @@
 class Mesa
 {
     public $id;
-    public $activo;
+    public $activa;
     public $libre;
 
     public function crearMesa()
@@ -23,7 +23,7 @@ class Mesa
     public static function obtenerTodas()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id FROM mesas WHERE activo != 0");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, activa, libre FROM mesas WHERE activa != 0");
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
@@ -32,14 +32,14 @@ class Mesa
     public static function obtenerMesa($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id FROM mesas WHERE id = :id AND activo != 0");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, activa, libre FROM mesas WHERE id = :id AND activa != 0");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
 
         return $consulta->fetchObject('Mesa');
     }
 
-    public static function modificarMesa($id)
+    public static function ocuparMesa($id)
     {
         $mesaAModificar = self::obtenerMesa($id);
         
@@ -75,7 +75,7 @@ class Mesa
         
         if ($mesaABorrar != null && $mesaABorrar->libre == 1) {
             $objAccesoDato = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET activo = 0 WHERE id = :id");
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET activa = 0 WHERE id = :id");
             $consulta->bindValue(':id', $id, PDO::PARAM_INT);
             if ($consulta->execute()) 
             {

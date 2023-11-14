@@ -45,12 +45,29 @@ $app->get('[/]', function (Request $request, Response $response) {
 $app->post('/usuarios',      'UsuarioController:CargarUno');
 $app->get('/usuarios/{id}',  'UsuarioController:TraerUno');
 $app->get('/usuarios',           'UsuarioController:TraerTodos');
-$app->put('/usuarios/{id}',  'UsuarioController:ModificarUno');
+$app->put('/usuarios',  'UsuarioController:ModificarUno');
 $app->delete('/usuarios/{id}',  'UsuarioController:BorrarUno');
 
 $app->post('/productos',      'ProductoController:CargarUno');
 $app->get('/productos/{id}',      'ProductoController:TraerUno');
 $app->get('/productos',      'ProductoController:TraerTodos');
+$app->put('/productos', 'ProductoController:ModificarUno');
+$app->delete('/productos/{id}', 'ProductoController:BorrarUno');
+
+
+$app->post('/mesas',      'MesaController:CargarUno');
+$app->get('/mesas/{id}',      'MesaController:TraerUno');
+$app->get('/mesas',      'MesaController:TraerTodos');
+$app->put('/mesas', 'MesaController:ModificarUno');
+$app->delete('/mesas/{id}', 'MesaController:BorrarUno');
+
+
+$app->post('/pedidos',      'PedidoController:CargarUno');
+$app->get('/pedidos/{id}',      'PedidoController:TraerUno');
+$app->get('/pedidos',      'PedidoController:TraerTodos');
+$app->put('/pedidos', 'PedidoController:ModificarUno');
+$app->delete('/pedidos/{id}', 'PedidoController:BorrarUno');
+
 
 
 $app->get('/test', function (Request $request, Response $response) {

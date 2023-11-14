@@ -83,16 +83,24 @@ class Producto
     
     public static function borrarProducto($id)
     {
-        $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE productos SET activo = 0 WHERE id = :id");
-        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-        if ($consulta->execute()) 
+        $idProductoAEliminar = self::obtenerProducto($id);
+        if($idProductoAEliminar != null)
         {
-            return "Producto eliminado exitosamente";
-        } 
-        else 
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE productos SET activo = 0 WHERE id = :id");
+            $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+            if ($consulta->execute()) 
+            {
+                return "Producto eliminado exitosamente";
+            } 
+            else 
+            {
+                return "Error al eliminar el producto";
+            }
+        }
+        else
         {
-            return "Error al eliminar el producto";
+            return "No se encontró un producto con id '{$id}'";
         }
     }
 }

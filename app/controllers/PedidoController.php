@@ -13,6 +13,8 @@ class PedidoController extends Pedido implements IApiUsable
         $id_usuario = $parametros['id_usuario'];
         $id_mesa = $parametros['id_mesa'];
         $codigo = $parametros['codigo'];
+        $nombre_cliente = $parametros['nombre_cliente'];
+        $tiempo_demora = $parametros['tiempo_demora'];
 
         $pedido = new Pedido();
         $pedido->precio_total = $precio_total;
@@ -20,6 +22,8 @@ class PedidoController extends Pedido implements IApiUsable
         $pedido->id_usuario = $id_usuario;
         $pedido->id_mesa = $id_mesa;
         $pedido->codigo = $codigo;
+        $pedido->nombre_cliente = $nombre_cliente;
+        $pedido->tiempo_demora = $tiempo_demora;
 
         $retorno = $pedido->crearPedido();
 
@@ -70,6 +74,8 @@ class PedidoController extends Pedido implements IApiUsable
         $pedidoAModificar->id_usuario = $parametros['id_usuario'];
         $pedidoAModificar->id_mesa = $parametros['id_mesa'];
         $pedidoAModificar->codigo = $parametros['codigo'];
+        $pedidoAModificar->nombre_cliente = $parametros['nombre_cliente'];
+        $pedidoAModificar->tiempo_demora = $parametros['tiempo_demora'];
 
         $retorno = Pedido::modificarPedido($pedidoAModificar);
 

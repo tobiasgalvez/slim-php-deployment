@@ -84,9 +84,9 @@ class ProductoController extends Producto implements IApiUsable
 
     public function BorrarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
+        //$parametros = $request->getParsedBody();
 
-        $id = $parametros['id'];
+        $id = $args['id'];
 
         $retorno = Producto::borrarProducto($id);
 

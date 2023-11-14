@@ -98,18 +98,26 @@ class Usuario
     
     public static function borrarUsuario($id)
     {
-        $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET activo = 0, fechaBaja = :fechaBaja WHERE id = :id");
-        $fecha = new DateTime(date("d-m-Y"));
-        $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-        $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
-        if ($consulta->execute()) 
+        $idUsuarioAEliminar = self::obtenerUsuario($id);
+        if($idUsuarioAEliminar != null)
         {
-            return "Usuario eliminado exitosamente";
-        } 
-        else 
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET activo = 0, fechaBaja = :fechaBaja WHERE id = :id");
+            $fecha = new DateTime(date("d-m-Y"));
+            $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+            $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
+            if ($consulta->execute()) 
+            {
+                return "Usuario eliminado exitosamente";
+            } 
+            else 
+            {
+                return "Error al eliminar el usuario";
+            }
+        }
+        else
         {
-            return "Error al eliminar el usuario";
+            return "No se encontró el id del usuario para eliminar";
         }
     }
 

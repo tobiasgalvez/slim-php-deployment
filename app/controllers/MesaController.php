@@ -51,7 +51,7 @@ class MesaController extends Mesa implements IApiUsable
 
         $id = $parametros['id'];
 
-        $retorno = Mesa::modificarMesa($id);
+        $retorno = Mesa::ocuparMesa($id);
 
         if($retorno != null)
         {
@@ -64,9 +64,9 @@ class MesaController extends Mesa implements IApiUsable
 
     public function BorrarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
+        //$parametros = $request->getParsedBody();
 
-        $id = $parametros['id'];
+        $id = $args['id'];
 
         $retorno = Mesa::borrarMesa($id);
 
