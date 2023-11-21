@@ -102,10 +102,10 @@ class Usuario
         if($idUsuarioAEliminar != null)
         {
             $objAccesoDato = AccesoDatos::obtenerInstancia();
-            $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET activo = 0, fechaBaja = :fechaBaja WHERE id = :id");
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE usuarios SET activo = 0, fechaBaja = NOW() WHERE id = :id");
             $fecha = new DateTime(date("d-m-Y"));
             $consulta->bindValue(':id', $id, PDO::PARAM_INT);
-            $consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
+            //$consulta->bindValue(':fechaBaja', date_format($fecha, 'Y-m-d H:i:s'));
             if ($consulta->execute()) 
             {
                 return "Usuario eliminado exitosamente";

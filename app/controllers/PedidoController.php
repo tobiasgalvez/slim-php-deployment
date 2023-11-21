@@ -9,7 +9,7 @@ class PedidoController extends Pedido implements IApiUsable
         $parametros = $request->getParsedBody();
 
         $precio_total = $parametros['precio_total'];
-        $id_producto = $parametros['id_producto'];
+        //$id_producto = $parametros['id_producto'];
         $id_usuario = $parametros['id_usuario'];
         $id_mesa = $parametros['id_mesa'];
         $codigo = $parametros['codigo'];
@@ -18,7 +18,7 @@ class PedidoController extends Pedido implements IApiUsable
 
         $pedido = new Pedido();
         $pedido->precio_total = $precio_total;
-        $pedido->id_producto = $id_producto;
+        //$pedido->id_producto = $id_producto;
         $pedido->id_usuario = $id_usuario;
         $pedido->id_mesa = $id_mesa;
         $pedido->codigo = $codigo;
@@ -70,7 +70,7 @@ class PedidoController extends Pedido implements IApiUsable
         $pedidoAModificar = new Pedido();
         $pedidoAModificar->id = $parametros['id'];
         $pedidoAModificar->precio_total = $parametros['precio_total'];
-        $pedidoAModificar->id_producto = $parametros['id_producto'];
+        //$pedidoAModificar->id_producto = $parametros['id_producto'];
         $pedidoAModificar->id_usuario = $parametros['id_usuario'];
         $pedidoAModificar->id_mesa = $parametros['id_mesa'];
         $pedidoAModificar->codigo = $parametros['codigo'];
@@ -88,11 +88,34 @@ class PedidoController extends Pedido implements IApiUsable
         return $response->withHeader('Content-Type', 'application/json');
     }
 
+
+    public function AsignarHorarioPedido($request, $response, $args)
+    {
+      //$parametros = $request->getParsedBody();
+
+      //$pedidoAModificar = new Pedido();
+
+      //$horarioSalida = date("Y-m-d H:i:s");
+
+      $id = $args['id'];
+
+      $retorno = Pedido::asignarHorarioSalidaPedido($id);
+
+      if($retorno != null)
+      {
+        $payload = json_encode(array("mensaje" => $retorno));
+      }
+
+      $response->getBody()->write($payload);
+      return $response->withHeader('Content-Type', 'application/json');
+    }
+
+
     public function BorrarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
+        //$parametros = $request->getParsedBody();
 
-        $id = $parametros['id'];
+        $id = $args['id'];
 
         $retorno = Pedido::borrarPedido($id);
 
