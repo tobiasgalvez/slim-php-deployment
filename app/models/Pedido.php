@@ -154,5 +154,83 @@ class Pedido
             return "Error al eliminar el pedido";
         }
     }
+
+
+
+
+
+    public function agregarProducto($id_pedido, $id_producto, $cantidad)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta
+        ("INSERT INTO pedido_producto (id_pedido, id_producto, cantidad) 
+        VALUES (:id_pedido, :id_producto, :cantidad)");
+
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        $consulta->bindValue(':id_producto', $id_producto, PDO::PARAM_STR);
+        $consulta->bindValue(':cantidad', $cantidad, PDO::PARAM_STR);
+
+        $consulta->execute();
+
+        return $objAccesoDatos->obtenerUltimoId();
+    } catch (Exception $e) 
+    {
+        return 'Error al agregar producto al pedido: ' . $e->getMessage();
+    }
+}
+
+
+
+public function obtenerPrecioProducto($id_producto)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT precio FROM productos WHERE id = :id_producto");
+        $consulta->bindValue(':id_producto', $id_producto, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetch(PDO::FETCH_OBJ)->precio;
+    } catch (Exception $e)
+    {
+        return 'Error al obtener el precio del producto: ' . $e->getMessage();
+    }
+}
+
+
+
+public function actualizarPrecioTotal($id_pedido, $precio_total)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE pedidos SET precio_total = :precio_total WHERE id = :id_pedido");
+        $consulta->bindValue(':precio_total', $precio_total, PDO::PARAM_STR);
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $objAccesoDatos->obtenerUltimoId();
+    } catch (Exception $e)
+    {
+        return 'Error al actualizar el precio total del pedido: ' . $e->getMessage();
+    }
+}
+
+
+
+
+public function obtenerProductosPedido($id_pedido)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id_producto, cantidad FROM pedido_producto WHERE id_pedido = :id_pedido");
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS);
+    } catch (Exception $e)
+    {
+        return 'Error al obtener los productos del pedido: ' . $e->getMessage();
+    }
+}
     
 }

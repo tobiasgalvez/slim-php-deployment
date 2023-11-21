@@ -128,4 +128,68 @@ class PedidoController extends Pedido implements IApiUsable
         return $response
           ->withHeader('Content-Type', 'application/json');
     }
+
+
+
+    public function AgregarProductoAPedido($request, $response, $args)
+    {
+        $parametros = $request->getParsedBody();
+    
+        $id_pedido = $parametros['id_pedido'];
+        $id_producto = $parametros['id_producto'];
+        $cantidad = $parametros['cantidad'];
+    
+        $pedido = new Pedido();
+        $respuesta = $pedido->agregarProducto($id_pedido, $id_producto, $cantidad);
+    
+        // obtener el precio del producto
+        $precio_producto = $pedido->obtenerPrecioProducto($id_producto);
+        // calcular el precio total
+        $precio_total = $precio_producto * $cantidad;
+        // agregar al precio total del pedido
+        $pedido->precio_total += $precio_total;
+    
+        // actualizar el precio total en la base de datos
+        $pedido->actualizarPrecioTotal($id_pedido, $pedido->precio_total);
+    
+        if ($respuesta != null)
+        {
+            if (!is_numeric($respuesta))
+            {
+                $payload = json_encode(array("error" => $respuesta));
+            }
+            else
+            {
+                $payload = json_encode(array("mensaje" => "Producto agregado al pedido con exito"));
+            }
+        }
+    
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+
+
+
+    public function TraerProductosDePedido($request, $response, $args)
+{
+    $id_pedido = $args['id_pedido'];
+
+    $pedido = new Pedido();
+    $productos_pedido = $pedido->obtenerProductosPedido($id_pedido);
+
+    if ($productos_pedido != null)
+    {
+        $payload = json_encode(array("productos_pedido" => $productos_pedido));
+    }
+    else
+    {
+        $payload = json_encode(array("mensaje" => "No se encontraron productos para este pedido"));
+    }
+
+    $response->getBody()->write($payload);
+    return $response->withHeader('Content-Type', 'application/json');
+}
+
+
 }

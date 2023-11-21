@@ -110,6 +110,14 @@ $app->group('/pedidos', function (RouteCollectorProxy $group)
 
 });
 
+$app->group('/pedidosProducto', function (RouteCollectorProxy $group)
+{
+        $group->post('[/]', 'PedidoController:AgregarProductoAPedido');
+    
+        $group->get('/{id}', 'PedidoController:TraerProductosDePedido');
+
+});
+
 
 // $app->post('/pedidos',      'PedidoController:CargarUno');
 // $app->get('/pedidos/{id}',      'PedidoController:TraerUno');
