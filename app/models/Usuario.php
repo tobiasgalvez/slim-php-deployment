@@ -61,6 +61,19 @@ class Usuario
 
 
 
+    public static function obtenerUsuarioPorNombreUsuario($nombre_usuario)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo
+        FROM usuarios WHERE usuario = :nombre_usuario AND activo != 0");
+        $consulta->bindValue(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+
+
     
     public static function modificarUsuario(Usuario $usuarioIngresado)
     {

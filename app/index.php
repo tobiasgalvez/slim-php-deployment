@@ -17,6 +17,7 @@ require_once './controllers/UsuarioController.php';
 require_once './controllers/ProductoController.php';
 require_once './controllers/MesaController.php';
 require_once './controllers/PedidoController.php';
+require_once './controllers/AuthController.php';
 require_once './middlewares/AuthMiddleware.php';
 require_once './middlewares/Logger.php';
 
@@ -28,8 +29,6 @@ require_once './middlewares/Logger.php';
 // Instantiate App
 $app = AppFactory::create();
 
-// $app->setBasePath('/app');
-//$app->setBasePath('/slim-php-deployment/app/');
 
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
@@ -46,24 +45,22 @@ $app->get('[/]', function (Request $request, Response $response) {
 
 
 
-//$app->get('/usuarios/{id}',  'Logger:VerificarRol'); 
+
+// $app->group('/usuarios', function ($app) {
+//     $app->get('[/]', 'AuthController:getProtectedResource');
+//  })->add(new AuthMiddleware('tu_clave_secreta'));
 
 
 $app->group('/usuarios', function (RouteCollectorProxy $group)
 {
+   $group->get('[/]', 'AuthController:getProtectedResource');
     $group->post('[/]',      'UsuarioController:CargarUno');
     $group->get('/{id}',  'UsuarioController:TraerUno');
     $group->get('[/]',           'UsuarioController:TraerTodos');
     $group->put('[/]',  'UsuarioController:ModificarUno');
     $group->delete('/{id}',  'UsuarioController:BorrarUno'); 
 
-});
-
-// $app->post('/usuarios',      'UsuarioController:CargarUno');
-// $app->get('/usuarios/{id}',  'UsuarioController:TraerUno');
-// $app->get('/usuarios',           'UsuarioController:TraerTodos');
-// $app->put('/usuarios',  'UsuarioController:ModificarUno');
-// $app->delete('/usuarios/{id}',  'UsuarioController:BorrarUno');
+})->add(new AuthMiddleware("tu_clave_secreta"));
 
 
 $app->group('/productos', function (RouteCollectorProxy $group)
@@ -76,12 +73,6 @@ $app->group('/productos', function (RouteCollectorProxy $group)
 
 });
 
-// $app->post('/productos',      'ProductoController:CargarUno');
-// $app->get('/productos/{id}',      'ProductoController:TraerUno');
-// $app->get('/productos',      'ProductoController:TraerTodos');
-// $app->put('/productos', 'ProductoController:ModificarUno');
-// $app->delete('/productos/{id}', 'ProductoController:BorrarUno');
-
 
 $app->group('/mesas', function (RouteCollectorProxy $group)
 {
@@ -92,12 +83,6 @@ $app->group('/mesas', function (RouteCollectorProxy $group)
     $group->delete('/{id}',  'MesaController:BorrarUno'); 
 
 });
-
-// $app->post('/mesas',      'MesaController:CargarUno');
-// $app->get('/mesas/{id}',      'MesaController:TraerUno');
-// $app->get('/mesas',      'MesaController:TraerTodos');
-// $app->put('/mesas', 'MesaController:ModificarUno');
-// $app->delete('/mesas/{id}', 'MesaController:BorrarUno');
 
 $app->group('/pedidos', function (RouteCollectorProxy $group)
 {
@@ -119,11 +104,14 @@ $app->group('/pedidosProducto', function (RouteCollectorProxy $group)
 });
 
 
-// $app->post('/pedidos',      'PedidoController:CargarUno');
-// $app->get('/pedidos/{id}',      'PedidoController:TraerUno');
-// $app->get('/pedidos',      'PedidoController:TraerTodos');
-// $app->put('/pedidos', 'PedidoController:ModificarUno');
-// $app->delete('/pedidos/{id}', 'PedidoController:BorrarUno');
+
+
+$app->group('/login', function (RouteCollectorProxy $group)
+{
+   $group->post('[/]', 'AuthController:login');
+});
+
+
 
 
 

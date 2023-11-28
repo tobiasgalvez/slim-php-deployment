@@ -4,46 +4,47 @@ require_once './interfaces/IApiUsable.php';
 
 class UsuarioController extends Usuario implements IApiUsable
 {
-    public function CargarUno($request, $response, $args)
-    {
-        $parametros = $request->getParsedBody();
-
-        print("holaaaaaaaaaa");
-        $nombre = $parametros['nombre'];
-        $apellido = $parametros['apellido'];
-        $tipo = $parametros['tipo'];
-        $usuario = $parametros['usuario'];
-        $clave = $parametros['clave'];
-        $email = $parametros['email'];
-
-        // Creamos el usuario
-        $usr = new Usuario();
-        $usr->nombre = $nombre;
-        $usr->apellido = $apellido;
-        $usr->tipo = $tipo;
-        $usr->usuario = $usuario;
-        $usr->clave = $clave;
-        $usr->email = $email;
-
-
-        $retorno = $usr->crearUsuario();
-
-        if($retorno != null)
-        {
-          if(!is_numeric($retorno))
-          {
-            $payload = json_encode(array("error" => $retorno));
-          }
-          else
-          {
-            $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
-          }
-        }
-
-
-        $response->getBody()->write($payload);
-        return $response->withHeader('Content-Type', 'application/json');
-    }
+  public function CargarUno($request, $response, $args)
+  {
+     $parametros = $request->getParsedBody();
+  
+     $nombre = $parametros['nombre'];
+     $apellido = $parametros['apellido'];
+     $tipo = $parametros['tipo'];
+     $usuario = $parametros['usuario'];
+     $clave = $parametros['clave'];
+     $email = $parametros['email'];
+  
+     // Hasheamos la contraseña
+     $clave = password_hash($clave, PASSWORD_DEFAULT);
+     
+  
+     // Creamos el usuario
+     $usr = new Usuario();
+     $usr->nombre = $nombre;
+     $usr->apellido = $apellido;
+     $usr->tipo = $tipo;
+     $usr->usuario = $usuario;
+     $usr->clave = $clave;
+     $usr->email = $email;
+  
+     $retorno = $usr->crearUsuario();
+  
+     if($retorno != null)
+     {
+       if(!is_numeric($retorno))
+       {
+         $payload = json_encode(array("error" => $retorno));
+       }
+       else
+       {
+         $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
+       }
+     }
+  
+     $response->getBody()->write($payload);
+     return $response->withHeader('Content-Type', 'application/json');
+  }
 
     public function TraerUno($request, $response, $args)
     {
