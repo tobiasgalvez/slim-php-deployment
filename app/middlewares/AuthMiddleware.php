@@ -1,47 +1,82 @@
 <?php
+
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
-require_once './models/JwtHandler.php';
+require_once './models/AutentificadorJWT.php';
+
 
 class AuthMiddleware
 {
-    private $secret_key;
-    private $jwtHandler;
+ 
+    public function __invoke(Request $request, RequestHandler $handler): Response
+    {   
+        $header = $request->getHeaderLine('Authorization');
+        $token = trim(explode("Bearer", $header)[1]);
+    
+        try {
+            AutentificadorJWT::VerificarToken($token);
+            $response = $handler->handle($request);
+        } catch (Exception $e) {
+            $response = new Response();
 
-    public function __construct($secret_key) {
-        $this->secret_key = $secret_key;
-        $this->jwtHandler = new JwtHandler();
+            //$payload = json_encode(array('mensaje' => 'ERROR: Hubo un error con el TOKEN'));
+            $payload = json_encode(array('mensaje' => $e));
+            $response->getBody()->write($payload);
+        }
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function __invoke(Request $request, RequestHandler $handler): Response
+    public static function verificarToken(Request $request, RequestHandler $handler): Response
     {
-       // echo "hola";
-        $auth_header = $request->getHeader('Authorization');
+        //echo "hola";
+        $header = $request->getHeaderLine('Authorization');
 
-        if (empty($auth_header)) {
+
+        // $token = trim(explode("Bearer", $header)[1]);
+        $token = str_replace('Bearer ', '', $header);
+        //var_dump($token);
+        
+        try {
+           // echo "hola2222";
+            AutentificadorJWT::VerificarToken($token);
+           // echo "hola3333";
+            $response = $handler->handle($request);
+        } catch (Exception $e) {
+            //echo $e;
             $response = new Response();
-            $payload = json_encode(array('mensaje' => 'Token no proporcionado'));
+            $payload = json_encode(array('mensaje' => 'ERROR: Hubo un error con el TOKEN'));
             $response->getBody()->write($payload);
-            return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 
-        $jwt_token = str_replace('Bearer ', '', $auth_header[0]);
+
+public static function verificarRol($rolesRequeridos) {
+    return function (Request $request, RequestHandler $handler) use ($rolesRequeridos) {
+        $header = $request->getHeaderLine('Authorization');
+        $token = str_replace('Bearer ', '', $header);
+        $response = new Response();
 
         try {
+            AutentificadorJWT::VerificarToken($token);
+            $datos = AutentificadorJWT::ObtenerData($token);
+            $rol = $datos->rol;
 
-            $decoded_payload = $this->jwtHandler->validate_jwt_token($jwt_token, $this->secret_key);
-            $id_usuario = $decoded_payload->sub;
-
-            $request = $request->withAttribute('id_usuario', $id_usuario);
-            $response = $handler->handle($request);
-            return $response;
+            if (in_array($rol, $rolesRequeridos)) {
+                $response = $handler->handle($request);
+            } else {
+                $rolesRequeridosStr = implode(', ', $rolesRequeridos);
+                $payload = json_encode(array('mensaje' => 'No es posible acceder a este recurso, necesitas ser uno de los siguientes roles: ' . $rolesRequeridosStr));
+                $response->getBody()->write($payload);
+            }
         } catch (Exception $e) {
-            echo $e;
-            $response = new Response();
-            $payload = json_encode(array('mensaje' => 'Token no valido'));
+            $payload = json_encode(array('mensaje' => $e));
             $response->getBody()->write($payload);
-            return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
         }
-    }
+
+        return $response->withHeader('Content-Type', 'application/json');
+    };
+}
 }

@@ -65,6 +65,32 @@ class Mesa
         }
     }
 
+    public static function desocuparMesa($id)
+    {
+        $mesaAModificar = self::obtenerMesa($id);
+        
+        if ($mesaAModificar != null) {
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas 
+                SET libre = 1
+                WHERE id = :id");
+            $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+    
+            if ($consulta->execute()) 
+            {
+                return "Mesa marcada como libre exitosamente";
+            } 
+            else 
+            {
+                return "Error al marcar la mesa como libre";
+            }
+        } 
+        else 
+        {
+            return "No se encontró la mesa a liberar";
+        }
+    }
+
 
 
 
@@ -91,4 +117,28 @@ class Mesa
             return "No se encontró la mesa a eliminar o la mesa está ocupada";
         }
     }
+
+
+    public static function obtenerMesaMasUsada()
+    {
+        
+        
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("SELECT mesas.id AS id_mesa, COUNT(pedidos.id) AS total_pedidos
+            FROM mesas
+            LEFT JOIN pedidos ON mesas.id = pedidos.id_mesa
+            GROUP BY mesas.id
+            ORDER BY total_pedidos DESC
+            LIMIT 1;");
+           
+    
+            $consulta->execute();
+            
+            return $consulta->fetchAll(PDO::FETCH_ASSOC);
+       
+    }
+
+
+
+
 }

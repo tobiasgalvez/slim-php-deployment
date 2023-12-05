@@ -6,6 +6,7 @@ class Producto
     public $tipo;
     public $precio;
     public $descripcion;
+    public $tiempoEstimado;
     public $activo;
 
     public function crearProducto()
@@ -13,13 +14,15 @@ class Producto
         try {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta
-            ("INSERT INTO productos (nombre, tipo, precio, descripcion) 
-            VALUES (:nombre, :tipo, :precio, :descripcion)");
+            ("INSERT INTO productos (nombre, tipo, precio, descripcion, tiempoEstimado) 
+            VALUES (:nombre, :tipo, :precio, :descripcion, :tiempoEstimado)");
     
             $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
             $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
             $consulta->bindValue(':precio', $this->precio, PDO::PARAM_STR);
             $consulta->bindValue(':descripcion', $this->descripcion, PDO::PARAM_STR);
+            $consulta->bindValue(':tiempoEstimado', $this->tiempoEstimado, PDO::PARAM_STR);
+
     
             $consulta->execute();
     
@@ -33,7 +36,7 @@ class Producto
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion, activo 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, tipo, precio, descripcion, tiempoEstimado, activo 
         FROM productos WHERE activo != 0");
         $consulta->execute();
 

@@ -16,25 +16,34 @@ class Pedido
     public function crearPedido()
     {
         try {
+
+            var_dump($this->id_usuario);
+            var_dump($this->id_mesa);
+            var_dump($this->codigo);
+            var_dump($this->nombre_cliente);
+
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            // Primero, realiza la inserción en la tabla "pedidos"
             $consulta = $objAccesoDatos->prepararConsulta
-            ("INSERT INTO pedidos (precio_total, id_usuario, id_mesa, codigo, 
-            nombre_cliente, tiempo_demora) 
-            VALUES (:precio_total, :id_usuario, :id_mesa, :codigo, 
-            :nombre_cliente, :tiempo_demora)");
+            ("INSERT INTO pedidos (id_usuario, id_mesa, codigo, nombre_cliente) 
+            VALUES (:id_usuario, :id_mesa, :codigo, :nombre_cliente)");
+
+            // Luego, realiza una consulta de actualización en la tabla "mesas"
+            $consultaDos = $objAccesoDatos->prepararConsulta
+            ("UPDATE mesas SET libre = 0 WHERE id = :id_mesa");
     
-            $consulta->bindValue(':precio_total', $this->precio_total, PDO::PARAM_STR);
+           // $consulta->bindValue(':precio_total', $this->precio_total, PDO::PARAM_STR);
             $consulta->bindValue(':id_usuario', $this->id_usuario, PDO::PARAM_STR);
             $consulta->bindValue(':id_mesa', $this->id_mesa, PDO::PARAM_STR);
             $consulta->bindValue(':codigo', $this->codigo, PDO::PARAM_STR);
-            //$consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
-            // $consulta->bindValue(':horario_llegada', $this->horario_llegada, PDO::PARAM_STR);
-            // $consulta->bindValue(':horario_salida', $this->horario_salida, PDO::PARAM_STR);
-            $consulta->bindValue('nombre_cliente', $this->nombre_cliente, PDO::PARAM_STR);
-            $consulta->bindValue(':tiempo_demora', $this->tiempo_demora, PDO::PARAM_STR);
+            $consulta->bindValue(':nombre_cliente', $this->nombre_cliente, PDO::PARAM_STR);
+
+            $consultaDos->bindValue(':id_mesa', $this->id_mesa, PDO::PARAM_STR);
+
 
     
             $consulta->execute();
+            $consultaDos->execute();
     
             return $objAccesoDatos->obtenerUltimoId();
         } catch (Exception $e) 
@@ -110,7 +119,7 @@ class Pedido
 
 
 
-    public static function asignarHorarioSalidaPedido($id)
+    public static function asignarHorarioDeSalidaPedido($id)
 {
     $pedidoAModificar = self::obtenerPedido($id);
     
@@ -120,7 +129,18 @@ class Pedido
         $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos
             SET horario_salida = NOW(), estado = 'finalizado' WHERE id = :id");
 
+
+            // Luego, realiza una consulta de actualización en la tabla "mesas"
+            $consultaDos = $objAccesoDato->prepararConsulta
+            ("UPDATE mesas SET libre = 1 WHERE id = :id_mesa");
+
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
+
+
+       
+        $consultaDos->bindValue(':id_mesa', $pedidoAModificar->id_mesa, PDO::PARAM_STR);
+
+        $consultaDos->execute();
 
         if ($consulta->execute()) 
         {
@@ -159,17 +179,19 @@ class Pedido
 
 
 
-    public function agregarProducto($id_pedido, $id_producto, $cantidad)
+    public function agregarProducto($id_pedido, $id_producto, $id_usuario)
 {
     try {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta
-        ("INSERT INTO pedido_producto (id_pedido, id_producto, cantidad) 
-        VALUES (:id_pedido, :id_producto, :cantidad)");
+        ("INSERT INTO pedido_producto (id_pedido, id_producto, id_usuario, estado) 
+        VALUES (:id_pedido, :id_producto, :id_usuario, :estado)");
 
         $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
         $consulta->bindValue(':id_producto', $id_producto, PDO::PARAM_STR);
-        $consulta->bindValue(':cantidad', $cantidad, PDO::PARAM_STR);
+        $consulta->bindValue(':id_usuario', $id_usuario, PDO::PARAM_STR);
+        //$consulta->bindValue(':cantidad', $cantidad, PDO::PARAM_STR);
+        $consulta->bindValue(':estado', "pendiente", PDO::PARAM_STR);
 
         $consulta->execute();
 
@@ -222,7 +244,7 @@ public function obtenerProductosPedido($id_pedido)
 {
     try {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id_producto, cantidad FROM pedido_producto WHERE id_pedido = :id_pedido");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id_producto FROM pedido_producto WHERE id_pedido = :id_pedido");
         $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
         $consulta->execute();
 
@@ -231,6 +253,208 @@ public function obtenerProductosPedido($id_pedido)
     {
         return 'Error al obtener los productos del pedido: ' . $e->getMessage();
     }
+}
+
+
+
+public function agregarPrecioTotalPedido($id_pedido)
+{
+
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos
+            SET precio_total = (
+                SELECT SUM(productos.precio)
+                FROM pedido_producto
+                INNER JOIN productos ON pedido_producto.id_producto = productos.id
+                WHERE pedido_producto.id_pedido = pedidos.id
+            )
+            WHERE id = :id");
+           
+           
+            $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
+            
+
+            if ($consulta->execute()) 
+            {
+                return "precio agregado exitosamente";
+            } 
+            else 
+            {
+                return "error al agregar precio total al pedido";
+            }
+
+}
+
+public function agregarTiempoDemoraPedido($id_pedido)
+{
+
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE pedidos
+            SET tiempo_demora = (
+                SELECT MAX(productos.tiempoEstimado)
+                FROM pedido_producto
+                INNER JOIN productos ON pedido_producto.id_producto = productos.id
+                WHERE pedido_producto.id_pedido = pedidos.id
+            )
+            WHERE id = :id");
+           
+           
+            $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
+            
+
+            if ($consulta->execute()) 
+            {
+                return "Tiempo de demora actualizado con éxito";
+            } 
+            else 
+            {
+                return "error al actualizar tiempo de demora";
+            }
+
+}
+
+
+public static function tiempoDemoraYCodigoPedido($id_pedido)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT tiempo_demora, codigo FROM pedidos WHERE id = :id_pedido");
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetch(PDO::FETCH_OBJ)->tiempo_demora;
+    } catch (Exception $e)
+    {
+        return 'Error al obtener el tiempo de demora del pedido: ' . $e->getMessage();
+    }
+}
+
+public static function cambiarEstadoDeProducto($id_pedido, $id_usuario, $nuevo_estado)
+{
+
+            $objAccesoDato = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDato->prepararConsulta("UPDATE pedido_producto
+            SET estado = :estado WHERE id_pedido = :id AND id_usuario = :id_usuario");
+           
+           
+            $consulta->bindValue(':id', $id_pedido, PDO::PARAM_INT);
+            $consulta->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT);
+            $consulta->bindValue(':estado', $nuevo_estado, PDO::PARAM_STR);
+
+            if ($consulta->execute()) 
+            {
+                return "estado cambiado a 'listo para servir' exitoso";
+            } 
+            else 
+            {
+                return "error al cambiar estado a 'listo para servir'";
+            }
+
+}
+
+
+
+
+
+public function obtenerProductosPendientesEmpleado($id_pedido, $id_usuario)
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT productos.nombre
+        FROM pedido_producto
+        JOIN productos ON pedido_producto.id_producto = productos.id
+        WHERE pedido_producto.id_pedido = :id_pedido
+          AND pedido_producto.id_usuario = :id_usuario AND pedido_producto.estado = :estado");
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        $consulta->bindValue(':id_usuario', $id_usuario, PDO::PARAM_STR);
+        $consulta->bindValue(':estado', "pendiente", PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Exception $e)
+    {
+        return 'Error al obtener los productos del pedido del usuario: ' . $e->getMessage();
+    }
+}
+
+
+
+
+public function actualizarEstadoDelPedido($id_pedido, $nuevo_estado)
+{
+
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE pedidos SET estado = :estado WHERE id = :id_pedido");
+        $consulta->bindValue(':estado', $nuevo_estado, PDO::PARAM_STR);
+        $consulta->bindValue(':id_pedido', $id_pedido, PDO::PARAM_STR);
+        
+        if ($consulta->execute()) 
+        {
+            return "estado del pedido actualizado a 'en preparacion' con éxito";
+        } 
+        else 
+        {
+            return "error al actualizar estado del pedido a 'en preparacion'";
+        }
+
+
+      
+}
+
+
+public function agregarEncuestaAlPedido($codigo_pedido, $encuesta, $valoracion)
+{
+
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("UPDATE pedidos SET encuesta = :encuesta, valoracion = :valoracion WHERE codigo = :codigo_pedido");
+        $consulta->bindValue(':encuesta', $encuesta, PDO::PARAM_STR);
+        $consulta->bindValue(':valoracion', $valoracion, PDO::PARAM_STR);
+        $consulta->bindValue(':codigo_pedido', $codigo_pedido, PDO::PARAM_STR);
+
+        
+        if ($consulta->execute()) 
+        {
+            return "encuesta y valoracion agregada al pedido con exito";
+        } 
+        else 
+        {
+            return "error al agregar encuesta y valoracion al pedido";
+        }
+
+
+      
+}
+
+
+public function obtenerMejoresValoracionesPedidos()
+{
+    try {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT encuesta, codigo, valoracion
+        FROM pedidos
+        WHERE valoracion >= 4");
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e)
+    {
+        return 'Error al obtener mejores valoraciones: ' . $e->getMessage();
+    }
+}
+
+
+public static function obtenerPedidosLargos()
+{
+    $objAccesoDato = AccesoDatos::obtenerInstancia();
+    
+    $consulta = $objAccesoDato->prepararConsulta("SELECT codigo, horario_llegada, horario_salida
+                                                FROM pedidos
+                                                WHERE TIMESTAMPDIFF(HOUR, horario_llegada, horario_salida) > 2
+                                                ORDER BY horario_llegada DESC;");
+    
+    $consulta->execute();
+    
+    return $consulta->fetchAll(PDO::FETCH_ASSOC);
 }
     
 }

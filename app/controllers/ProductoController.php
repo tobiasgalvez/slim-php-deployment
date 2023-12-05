@@ -13,6 +13,14 @@ class ProductoController extends Producto implements IApiUsable
         $tipo = $parametros['tipo'];
         $precio = $parametros['precio'];
         $descripcion = $parametros['descripcion'];
+        $tiempoEstimado = $parametros['tiempoEstimado'];
+
+        // $tiempoFormateado = date("H:i:s", strtotime($tiempoEstimado));
+
+        // Suponiendo que ya tienes una conexión a la base de datos
+    $tiempoEnMinutos = intval($tiempoEstimado);
+    $tiempoFormateado = gmdate("H:i:s", $tiempoEnMinutos * 60);
+
 
         // Creamos el producto
         $prod = new Producto();
@@ -20,6 +28,8 @@ class ProductoController extends Producto implements IApiUsable
         $prod->tipo = $tipo;
         $prod->precio = $precio;
         $prod->descripcion = $descripcion;
+        $prod->tiempoEstimado = $tiempoFormateado;
+
 
         $retorno = $prod->crearProducto();
 

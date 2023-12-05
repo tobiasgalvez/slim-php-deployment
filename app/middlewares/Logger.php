@@ -2,6 +2,7 @@
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
+require_once './models/AutentificadorJWT.php';
 
 class LoggerMiddleware
 {
@@ -29,18 +30,32 @@ class LoggerMiddleware
 
     public function VerificarRol(Request $request, RequestHandler $handler): Response
     {   
-        $parametros = $request->getQueryParams();
+        // $parametros = $request->getQueryParams();
 
-        $sector = $parametros['sector'];
+        // $rol = $parametros['rol'];
 
-        if ($sector === 'admin') {
-            $response = $handler->handle($request);
-        } else {
-            $response = new Response();
-            $payload = json_encode(array('mensaje' => 'No sos Admin'));
-            $response->getBody()->write($payload);
-        }
+        // if ($rol === 'admin') {
+        //     $response = $handler->handle($request);
+        // } else {
+        //     $response = new Response();
+        //     $payload = json_encode(array('mensaje' => 'No sos Admin'));
+        //     $response->getBody()->write($payload);
+        // }
 
-        return $response->withHeader('Content-Type', 'application/json');
+        // return $response->withHeader('Content-Type', 'application/json');
+
+        $token = $request->getHeader('Authorization');
+    $datos = AutentificadorJWT::ObtenerData($token);
+    $rol = $datos['rol'];
+
+    if ($rol === 'admin') {
+        $response = $handler->handle($request);
+    } else {
+        $response = new Response();
+        $payload = json_encode(array('mensaje' => 'No sos Admin'));
+        $response->getBody()->write($payload);
+    }
+
+    return $response->withHeader('Content-Type', 'application/json');
     }
 }

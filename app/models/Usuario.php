@@ -10,6 +10,7 @@ class Usuario
     public $clave;
     public $email;
     public $fechaBaja;
+    public $fechaAlta;
     public $activo;
 
 
@@ -18,8 +19,9 @@ class Usuario
         try {
             $objAccesoDatos = AccesoDatos::obtenerInstancia();
             $consulta = $objAccesoDatos->prepararConsulta
-            ("INSERT INTO usuarios (nombre, apellido, tipo, usuario, clave, email) 
-            VALUES (:nombre, :apellido, :tipo, :usuario, :clave, :email)");
+            ("INSERT INTO usuarios (nombre, apellido, tipo, usuario, clave, email, fechaAlta) 
+            VALUES (:nombre, :apellido, :tipo, :usuario, :clave, :email, :fechaAlta)");
+            date_default_timezone_set('America/Argentina/Buenos_Aires');
     
             $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
             $consulta->bindValue(':apellido', $this->apellido, PDO::PARAM_STR);
@@ -27,6 +29,35 @@ class Usuario
             $consulta->bindValue(':usuario', $this->usuario, PDO::PARAM_STR);
             $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
             $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
+            $consulta->bindValue(':fechaAlta', date('Y-m-d H:i:s'), PDO::PARAM_STR); // date representa fecha y hora actual
+    
+            $consulta->execute();
+    
+            return $objAccesoDatos->obtenerUltimoId();
+        } catch (Exception $e) 
+        {
+            return 'Error al crear el usuario: ' . $e->getMessage();
+        }
+    }
+
+
+    public function cargarUsuario()
+    {
+        try {
+            $objAccesoDatos = AccesoDatos::obtenerInstancia();
+            $consulta = $objAccesoDatos->prepararConsulta
+            ("INSERT INTO usuarios (nombre, apellido, tipo, usuario, clave, email, fechaBaja, fechaAlta, activo) 
+            VALUES (:nombre, :apellido, :tipo, :usuario, :clave, :email, :fechaBaja, :fechaAlta, :activo)");
+    
+            $consulta->bindValue(':nombre', $this->nombre, PDO::PARAM_STR);
+            $consulta->bindValue(':apellido', $this->apellido, PDO::PARAM_STR);
+            $consulta->bindValue(':tipo', $this->tipo, PDO::PARAM_STR);
+            $consulta->bindValue(':usuario', $this->usuario, PDO::PARAM_STR);
+            $consulta->bindValue(':clave', $this->clave, PDO::PARAM_STR);
+            $consulta->bindValue(':email', $this->email, PDO::PARAM_STR);
+            $consulta->bindValue(':fechaBaja', $this->fechaBaja, PDO::PARAM_STR);
+            $consulta->bindValue(':fechaAlta', $this->fechaAlta, PDO::PARAM_STR);
+            $consulta->bindValue(':activo', $this->activo, PDO::PARAM_STR);
     
             $consulta->execute();
     
@@ -41,8 +72,18 @@ class Usuario
     public static function obtenerTodos()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo 
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo, fechaAlta, fechaBaja
         FROM usuarios WHERE activo != 0");
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Usuario');
+    }
+
+    public static function obtenerTodosIncluidosInactivos()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo, fechaAlta, fechaBaja
+        FROM usuarios");
         $consulta->execute();
 
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Usuario');
@@ -51,7 +92,7 @@ class Usuario
     public static function obtenerUsuario($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo, fechaAlta, fechaBaja
         FROM usuarios WHERE id = :id AND activo != 0");
         $consulta->bindValue(':id', $id, PDO::PARAM_STR);
         $consulta->execute();
@@ -65,6 +106,19 @@ class Usuario
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT id, nombre, apellido, tipo, usuario, clave, email, activo
+        FROM usuarios WHERE usuario = :nombre_usuario AND activo != 0");
+        $consulta->bindValue(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchObject('Usuario');
+    }
+
+
+
+    public static function obtenerRolDeUsuario($nombre_usuario)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT tipo
         FROM usuarios WHERE usuario = :nombre_usuario AND activo != 0");
         $consulta->bindValue(':nombre_usuario', $nombre_usuario, PDO::PARAM_STR);
         $consulta->execute();
