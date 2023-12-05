@@ -456,5 +456,18 @@ public static function obtenerPedidosLargos()
     
     return $consulta->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+public static function obtenerRecaudacionUltimos30Dias()
+{
+    $objAccesoDato = AccesoDatos::obtenerInstancia();
     
+    $consulta = $objAccesoDato->prepararConsulta("SELECT SUM(precio_total) AS total_recaudado, COUNT(pedidos.id) AS total_pedidos
+                                                FROM pedidos
+                                                WHERE horario_llegada >= NOW() - INTERVAL 30 DAY;");
+    
+    $consulta->execute();
+    
+    return $consulta->fetch(PDO::FETCH_ASSOC);
+}
 }

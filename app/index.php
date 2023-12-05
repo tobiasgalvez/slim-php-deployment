@@ -90,17 +90,18 @@ $app->group('/mesa', function (RouteCollectorProxy $group)
 $app->group('/pedidos', function (RouteCollectorProxy $group)
 {
     $group->post('[/]', 'PedidoController:CargarUno')->add(\AuthMiddleware::verificarRol(['admin', 'mozo']));
+    $group->get('/estadisticas', 'PedidoController:Estadisticas30Dias')->add(\AuthMiddleware::verificarRol(['admin']));
     $group->get('/pedidosLargos', 'PedidoController:PedidosMasDeDosHoras')->add(\AuthMiddleware::verificarRol(['admin']));
     $group->get('/obtenerMejoresComentarios', 'PedidoController:MejoresComentarios')->add(\AuthMiddleware::verificarRol(['admin']));
-    $group->get('/{id}', 'PedidoController:TraerUno');
-    $group->get('[/]', 'PedidoController:TraerTodos');
-    $group->put('/actualizarPrecioTotalPedido', 'PedidoController:ActualizarPrecioTotalAPedido');
-    $group->put('/actualizarTiempoDemoraPedido', 'PedidoController:ActualizarTiempoEstimadoPedido');
+    $group->get('/{id}', 'PedidoController:TraerUno')->add(\AuthMiddleware::verificarRol(['admin', 'mozo']));
+    $group->get('[/]', 'PedidoController:TraerTodos')->add(\AuthMiddleware::verificarRol(['admin', 'mozo']));
+    $group->put('/actualizarPrecioTotalPedido', 'PedidoController:ActualizarPrecioTotalAPedido')->add(\AuthMiddleware::verificarRol(['admin', 'mozo']));
+    $group->put('/actualizarTiempoDemoraPedido', 'PedidoController:ActualizarTiempoEstimadoPedido')->add(\AuthMiddleware::verificarRol(['admin', 'mozo']));
     $group->put('/actualizarEstadoPedido', 'PedidoController:ActualizarEstadoPedido')->add(\AuthMiddleware::verificarRol(['bartender', 'cocinero', 'mozo']));
     $group->put('[/]', 'PedidoController:ModificarUno');
     $group->put('/{id}', 'PedidoController:AsignarHorarioSalidaPedido');
     $group->delete('/{id}', 'PedidoController:BorrarUno'); 
-    $group->post('/tomarFotoPedido', 'PedidoController:SacarFotoDeMesa');
+    $group->post('/tomarFotoPedido', 'PedidoController:SacarFotoDeMesa')->add(\AuthMiddleware::verificarRol(['mozo']));
 
 
 
@@ -118,7 +119,7 @@ $app->group('/pedidosProducto', function (RouteCollectorProxy $group)
 
        // $group->put('/{id_usuario}', 'PedidoController:CambiarEstadoProductoAListoServir')->add(\AuthMiddleware::verificarRol(['bartender', 'cocinero']));
 
-        $group->get('/{id}/{id_usuario}', 'PedidoController:ObtenerPendientesEmpleado');
+        $group->get('/{id}/{id_usuario}', 'PedidoController:ObtenerPendientesEmpleado')->add(\AuthMiddleware::verificarRol(['bartender', 'cocinero']));
 
 
 

@@ -412,7 +412,23 @@ public function PedidosMasDeDosHoras($request, $response, $args)
 }
 
 
+public function Estadisticas30Dias($request, $response, $args)
+{
+    $resultado = Pedido::obtenerRecaudacionUltimos30Dias();
 
+    if (!empty($resultado)) {
+        $total_recaudado = $resultado['total_recaudado'];
+        $total_pedidos = $resultado['total_pedidos'];
+
+        $mensaje = "Estadísticas últimos 30 días: Cantidad de dinero recaudada: $total_recaudado con un total de $total_pedidos pedidos";
+        $payload = json_encode(array("mensaje" => $mensaje));
+    } else {
+        $payload = json_encode(array("mensaje" => "No se encontraron resultados para la mesa más utilizada"));
+    }
+
+    $response->getBody()->write($payload);
+    return $response->withHeader('Content-Type', 'application/json');
+}
 
 
 
